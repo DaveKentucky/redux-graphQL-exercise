@@ -1,6 +1,10 @@
 import { gql } from 'apollo-boost';
 
-import { addItemToCart, getCartItemsCount } from './cart.utils';
+import {
+    addItemToCart,
+    getCartItemsCount,
+    getCartItemsTotal
+} from './cart.utils';
 
 export const typeDefs = gql`
     extend type Item {
@@ -10,24 +14,44 @@ export const typeDefs = gql`
     extend type Mutation {
         ToggleCartHidden: Boolean!
         AddItemToCart(item: Item!): [Item]!
+        SetCurrentUser(user: User!): User!
+    }
+
+    extend type User {
+        id: ID!
+        displayName: String!
+        email: String!
+        createdAt: String!
     }
 `;
 
-const GET_CART_HIDDEN = gql`
+export const GET_CART_HIDDEN = gql`
     {
         cartHidden @client
     }
 `;
 
-const GET_CART_ITEMS = gql`
+export const GET_CART_ITEMS = gql`
     {
         cartItems @client
     }
 `;
 
-const GET_ITEMS_COUNT = gql`
+export const GET_ITEMS_COUNT = gql`
     {
         cartItemsCount @client
+    }
+`;
+
+export const GET_CART_TOTAL = gql`
+    {
+        cartItemsTotal @client
+    }
+`;
+
+export const GET_CURRENT_USER = gql`
+    {
+        currentUser @client
     }
 `;
 
@@ -59,11 +83,25 @@ export const resolvers = {
             });
 
             cache.writeQuery({
+                query: GET_CART_TOTAL,
+                data: { cartItemsTotal: getCartItemsTotal(newCartItems) }
+            });
+
+            cache.writeQuery({
                 query: GET_CART_ITEMS,
                 data: { cartItems: newCartItems }
             });
 
             return newCartItems;
+        },
+
+        setCurrentUser: (_root, { user }, { cache }) => {
+            cache.writeQuery({
+                query: GET_CURRENT_USER,
+                data: { currentUser: user }
+            });
+
+            return user;
         }
     }
 };

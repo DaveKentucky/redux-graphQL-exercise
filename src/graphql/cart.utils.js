@@ -37,3 +37,12 @@ export const getCartItemsCount = (cartItems) => (
     0
   )
 );
+
+export const getCartItemsTotal = (cartItems) => (
+  cartItems.reduce(
+    (accumulatedTotal, cartItem) => (
+      accumulatedTotal + cartItem.quantity * cartItem.price
+    ),
+    0
+  )
+)
